@@ -1,0 +1,52 @@
+model:
+  id: "meta-llama/Prompt-Guard-86M"
+  token_env: "HUGGINGFACE_TOKEN"
+
+server:
+  port: 8080          # mitmproxy listen port (set via CLI --listen-port)
+  timeout: 120
+
+logging:
+  log_requests: true
+  log_blocks: true
+  log_safe_requests: false
+  log_passthrough: true      # set true to log every non-AI request (noisy)
+
+scanning:
+  prompt_threshold: 0.6    # Jailbreak threshold (user prompts)
+  document_threshold: 0.3  # Injection threshold (external/fetched content) — lower = more sensitive
+  max_length: 1024
+  max_extracted_text_length: 3000
+  scan_window_size: 200
+
+request:
+  scan_requests: true
+  # Define which roles in the message history to scan.
+  # System prompts are usually massive and safe, so omitted by default.
+  # tools are the LLM window to the outside world, so they are the most important to scan
+  scan_roles:
+    # - user
+    - tool
+    - assistant
+    # - system 
+  extract_fields:
+    - text
+    - prompt
+    - messages
+    - input
+    - query
+
+proxy:
+  # AI path patterns — matched as SUBSTRINGS of the URL path
+  # e.g. "chat/completions" matches "/v1/chat/completions" AND "/api/openai/v1/chat/completions"
+  ai_paths:
+    - "chat/completions"
+    - "v1/completions"
+    - "v1/messages"
+    - "v1/embeddings"
+    - "v1/images/generations"
+    - "v1/audio/transcriptions"
+    - "api/generate"
+    - "api/chat"
+    - "api/openai"
+

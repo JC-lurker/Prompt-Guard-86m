@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  prompt-guard-86m:
+    build: .
+    container_name: prompt-guard-firewall
+    ports:
+      - "5000:8080"        # Proxy port
+      - "5001:5001"        # mitmweb UI (only if using mitmweb instead of mitmdump)
+    env_file:
+      - .env
+    volumes:
+      - certs:/root/mitmproxy   # Persist CA certs + config.yaml in same dir
+    restart: unless-stopped
+
+volumes:
+  certs:
+    driver: local
