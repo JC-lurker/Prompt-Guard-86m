@@ -53,9 +53,9 @@ request:
 
 ## 3. Trusting the Proxy Certificate
 
-Because the proxy performs Man-in-the-Middle (MITM) decryption to scan HTTPS traffic, your AI clients (like LobeHub) must trust the proxy's CA certificate.
+Because the proxy performs Man-in-the-Middle (MITM) decryption to scan HTTPS traffic, your AI clients (like openclaw) must trust the proxy's CA certificate.
 
-### For LobeHub / Node.js / Ollama
+### For openclaw/ LobeHub / Node.js / Ollama
 If running in Docker, you can pass the certificate to the Node process using the `NODE_EXTRA_CA_CERTS` environment variable.
 
 1. **Locate the Cert**: The cert is generated on the first run at `~/mitmproxy/mitmproxy-ca-cert.pem` (or inside the container volume).
