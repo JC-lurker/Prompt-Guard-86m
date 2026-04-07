@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages: mitmproxy replaces asyncio/ssl/cryptography manual work
+# Install Python packages: mitmproxy pytorch transformers pyyaml
 RUN pip install --no-cache-dir \
     --extra-index-url https://download.pytorch.org/whl/cpu \
     torch transformers pyyaml mitmproxy
@@ -23,4 +23,5 @@ ENV PYTHONUNBUFFERED=1
 
 # mitmproxy stores its CA in ~/mitmproxy — persist via volume
 # Clients install ~/mitmproxy/mitmproxy-ca-cert.pem as trusted root
+# I'm using arcane, so my volumes are strange, adjust to your environment accordingly
 CMD ["mitmweb", "-s", "guard.py", "--listen-port", "8080", "--web-host", "0.0.0.0", "--web-port", "5001", "--set", "connection_strategy=lazy", "--set", "confdir=/root/mitmproxy"]

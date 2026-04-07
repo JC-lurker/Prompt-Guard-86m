@@ -13,6 +13,7 @@ services:
       - certs:/root/mitmproxy   # Persist CA certs + config.yaml in same dir
     restart: unless-stopped
 
+# I'm using arcane, so my volumes are strange, adjust to your environment accordingly
 volumes:
   certs:
     driver: local

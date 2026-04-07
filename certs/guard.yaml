@@ -9,8 +9,8 @@ server:
 logging:
   log_requests: true
   log_blocks: true
-  log_safe_requests: false
-  log_passthrough: true      # set true to log every non-AI request (noisy)
+  log_safe_requests: true
+  log_passthrough: false      # set true to log every non-AI request (noisy)
 
 scanning:
   prompt_threshold: 0.6    # Jailbreak threshold (user prompts)

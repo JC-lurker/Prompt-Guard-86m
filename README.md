@@ -11,6 +11,40 @@ This project implements a high-performance **mitmproxy** addon that intercepts A
     2. **Sliding-Window Response Scanning**: Kills the connection mid-stream if the AI starts generating poisoned content.
 - **Automated XML Detection**: Detects and scans tool-like tags (`<crawlResults>`, etc.) even if they are buried in assistant or user roles.
 
+## Event Flow
+
+```mermaid
+graph TD
+    subgraph "Request Phase"
+        A[Client Request] --> B{AI API Path?}
+        B -- No --> C[Direct Passthrough]
+        B -- Yes --> D[Extract Scannable Text]
+        D --> E[Scan with Prompt-Guard-86M]
+        E --> F{Threat Detected?}
+        F -- Yes --> G[Return 403 Blocked]
+        F -- No --> H[Forward to LLM Provider]
+    end
+
+    subgraph "Response Phase (SSE)"
+        H --> I{Is Streaming?}
+        I -- No --> J[Passthrough Response]
+        I -- Yes --> K[Enable Sliding-Window Scan]
+        K --> L[Accumulate Stream Chunks]
+        L --> M{Window Size Reached?}
+        M -- No --> L
+        M -- Yes --> N[Extract Text from Deltas]
+        N --> O[Scan with Prompt-Guard-86M]
+        O --> P{Threat Detected?}
+        P -- Yes --> Q[Kill Connection Mid-stream]
+        P -- No --> L
+    end
+
+    style G fill:#f96,stroke:#333,stroke-width:2px
+    style Q fill:#f96,stroke:#333,stroke-width:2px
+    style E fill:#69f,stroke:#333,stroke-width:2px
+    style O fill:#69f,stroke:#333,stroke-width:2px
+```
+
 ---
 
 ## 1. Setup & Model Access
@@ -55,7 +89,7 @@ request:
 
 Because the proxy performs Man-in-the-Middle (MITM) decryption to scan HTTPS traffic, your AI clients (like openclaw) must trust the proxy's CA certificate.
 
-### For openclaw/ LobeHub / Node.js / Ollama
+### For Openclaw / LobeHub / Node.js / Ollama
 If running in Docker, you can pass the certificate to the Node process using the `NODE_EXTRA_CA_CERTS` environment variable.
 
 1. **Locate the Cert**: The cert is generated on the first run at `~/mitmproxy/mitmproxy-ca-cert.pem` (or inside the container volume).
@@ -83,4 +117,4 @@ docker-compose up -d
 ```
 
 Access the UI to see live scans and blocks at `http://localhost:5001`.
-If the blocks becomes persistent, there are posioned memories carry over in your new session. You need to clear the memories of the LLM.
+If the blocks becomes persistent, there are posion memories carry over into your new session. You need to clear the memories of the LLM.
