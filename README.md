@@ -33,7 +33,7 @@ graph TD
     Model[[<b>Prompt Guard 86M</b>]]
     Score{Threat Logic}
     Block[Block & Return 403]
-    Forward[Forward to Provider]
+    Forward[Forward to Provider/client]
     StreamCheck{Streaming Response?}
     Window[Sliding Window Buffer]
     BufferScan[[<b>Deep Buffer Scan</b>]]
