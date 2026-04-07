@@ -10,6 +10,8 @@ This project implements a high-performance **mitmproxy** addon that intercepts A
     1. **Request Scanning**: Blocks malicious payloads before they reach the LLM.
     2. **Sliding-Window Response Scanning**: Kills the connection mid-stream if the AI starts generating poisoned content.
 - **Automated XML Detection**: Detects and scans tool-like tags (`<crawlResults>`, etc.) even if they are buried in assistant or user roles.
+- **No AI skills required**: Act as a layer between your system and the LLM, drop harmful content before it reaches the your system.
+
 
 ## Event Flow
 
