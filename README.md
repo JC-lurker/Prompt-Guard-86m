@@ -14,35 +14,57 @@ This project implements a high-performance **mitmproxy** addon that intercepts A
 ## Event Flow
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#e1f5fe',
+    'primaryTextColor': '#01579b',
+    'primaryBorderColor': '#0288d1',
+    'lineColor': '#0288d1',
+    'secondaryColor': '#f3e5f5',
+    'tertiaryColor': '#e8f5e9'
+  }
+}}%%
 graph TD
-    subgraph "Request Phase"
-        A[Client Request] --> B{AI API Path?}
-        B -- No --> C[Direct Passthrough]
-        B -- Yes --> D[Extract Scannable Text]
-        D --> E[Scan with Prompt-Guard-86M]
-        E --> F{Threat Detected?}
-        F -- Yes --> G[Return 403 Blocked]
-        F -- No --> H[Forward to LLM Provider]
-    end
+    %% Node Definitions
+    Start([Incoming Traffic])
+    PathCheck{AI Endpoint?}
+    Extract[Extract Scannable Context]
+    Model[[<b>Prompt Guard 86M</b>]]
+    Score{Threat Logic}
+    Block[Block & Return 403]
+    Forward[Forward to Provider]
+    StreamCheck{Streaming Response?}
+    Window[Sliding Window Buffer]
+    BufferScan[[<b>Deep Buffer Scan</b>]]
+    Kill[Kill Mid-stream]
+    Done([End])
 
-    subgraph "Response Phase (SSE)"
-        H --> I{Is Streaming?}
-        I -- No --> J[Passthrough Response]
-        I -- Yes --> K[Enable Sliding-Window Scan]
-        K --> L[Accumulate Stream Chunks]
-        L --> M{Window Size Reached?}
-        M -- No --> L
-        M -- Yes --> N[Extract Text from Deltas]
-        N --> O[Scan with Prompt-Guard-86M]
-        O --> P{Threat Detected?}
-        P -- Yes --> Q[Kill Connection Mid-stream]
-        P -- No --> L
-    end
+    %% Flow
+    Start --> PathCheck
+    PathCheck -- "No" --> Done
+    PathCheck -- "Yes" --> Extract
+    Extract --> Model
+    Model --> Score
+    Score -- "Malicious" --> Block
+    Score -- "Safe" --> Forward
+    Forward --> StreamCheck
+    StreamCheck -- "No" --> Done
+    StreamCheck -- "Yes" --> Window
+    Window --> BufferScan
+    BufferScan -- "Malicious" --> Kill
+    BufferScan -- "Safe" --> Window
 
-    style G fill:#f96,stroke:#333,stroke-width:2px
-    style Q fill:#f96,stroke:#333,stroke-width:2px
-    style E fill:#69f,stroke:#333,stroke-width:2px
-    style O fill:#69f,stroke:#333,stroke-width:2px
+    %% Styling
+    classDef malicious fill:#ffebee,stroke:#c62828,color:#b71c1c,stroke-width:2px;
+    classDef safe fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20,stroke-width:2px;
+    classDef logic fill:#e1f5fe,stroke:#0277bd,color:#01579b;
+    classDef ai fill:#fff3e0,stroke:#ef6c00,color:#e65100,stroke-width:2px,stroke-dasharray: 5 5;
+
+    class Block,Kill malicious;
+    class Forward,Done safe;
+    class Start,PathCheck,Extract,Score,StreamCheck,Window logic;
+    class Model,BufferScan ai;
 ```
 
 ---
